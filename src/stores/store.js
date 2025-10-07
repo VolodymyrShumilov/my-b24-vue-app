@@ -14,5 +14,32 @@ export const usePostsStore = defineStore("posts", () => {
     posts.value = posts.value.filter((post) => post.id !== postId);
   };
 
-  return { posts, getPostsCount, removePost };
+  const removeAllPosts = () => {
+    posts.value = [];
+  };
+
+  const addPost = (newPost) => {
+    posts.value.push({
+      id: posts.value.length + 1,
+      title: newPost.title,
+      content: newPost.content,
+    });
+  };
+
+  const editPost = (postId, updatedData) => {
+    const post = posts.value.find((p) => p.id === postId);
+    if (post) {
+      post.title = updatedData.title;
+      post.content = updatedData.content;
+    }
+  };
+
+  return {
+    posts,
+    getPostsCount,
+    removePost,
+    removeAllPosts,
+    addPost,
+    editPost,
+  };
 });
