@@ -1,15 +1,30 @@
 <template>
   <div class="blog-posts">
     <h2 class="blog-posts__title">Блог</h2>
+
+    <!-- Пошук постів -->
+    <div class="blog-posts__search">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Введіть заголовок для пошуку"
+      />
+    </div>
+
+    <!-- Список постів -->
     <div class="blog-posts__list">
-      <!-- Цикл по постах -->
+      <!-- Цикл по відфільтрованих постах -->
       <div
-        v-for="post in postsStore.posts"
+        v-for="post in filteredPosts"
         :key="post.id"
         class="blog-posts__card"
       >
-        <h3 class="blog-posts__card-title">{{ post.title }}</h3>
+        <h3 class="blog-posts__card-title">
+          <router-link :to="`/post/${post.id}`">{{ post.title }}</router-link>
+        </h3>
         <p class="blog-posts__card-content">{{ post.content }}</p>
+
+        <!-- Кнопки управління постом -->
         <div class="blog-posts__button-group">
           <button
             class="blog-posts__button blog-posts__button--delete"
@@ -25,6 +40,7 @@
           </button>
         </div>
 
+        <!-- Форма редагування (показується тільки для активного поста) -->
         <div
           v-if="editingPostId === post.id"
           class="blog-posts__edit-form-wrapper"
@@ -63,6 +79,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Статистика та видалення всіх постів -->
     <p>Загальна кількість постів: {{ postsStore.getPostsCount }}</p>
     <button
       v-if="postsStore.getPostsCount !== 0"
@@ -72,6 +90,7 @@
       Видалити всі пости
     </button>
 
+    <!-- Форма додавання нового поста -->
     <h3>Додати новий пост</h3>
     <form @submit.prevent="addNewPost">
       <div>
@@ -97,50 +116,69 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { usePostsStore } from "@/stores/store";
 
+// Ініціалізація стора для роботи з постами
 const postsStore = usePostsStore();
 
+// Реактивні змінні для нового поста
 const newPostTitle = ref("");
 const newPostContent = ref("");
 
-const editingPostId = ref(null);
+// Реактивні змінні для редагування
+const editingPostId = ref(null); // ID поста, який редагується
 const editTitle = ref("");
 const editContent = ref("");
 
+// Змінна для пошуку
+const searchQuery = ref("");
+
+// Додавання нового поста
 const addNewPost = () => {
+  // Перевірка, що обидва поля заповнені
   if (newPostTitle.value && newPostContent.value) {
     postsStore.addPost({
       title: newPostTitle.value,
       content: newPostContent.value,
     });
+    // Очищення полів після додавання
     newPostTitle.value = "";
     newPostContent.value = "";
   }
 };
 
+// Початок редагування поста
 function startEdit(post) {
   editingPostId.value = post.id;
   editTitle.value = post.title;
   editContent.value = post.content;
 }
 
+// Збереження змін при редагуванні
 function submitEdit(postId) {
   if (editTitle.value && editContent.value) {
     postsStore.editPost(postId, {
       title: editTitle.value,
       content: editContent.value,
     });
-    cancelEdit();
+    cancelEdit(); // Закрити форму після збереження
   }
 }
 
+// Скасування редагування
 function cancelEdit() {
   editingPostId.value = null;
   editTitle.value = "";
   editContent.value = "";
 }
+
+// Обчислювана властивість для фільтрації постів
+const filteredPosts = computed(() => {
+  return postsStore.posts.filter((post) =>
+    post.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
 </script>
 
 <style>
@@ -274,5 +312,18 @@ label {
   padding: 1rem;
   border-radius: 0.25rem;
   border: 1px solid #e2e8f0;
+}
+.blog-posts__search {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.blog-posts__card-title a {
+  color: #3182ce;
+  text-decoration: none;
+}
+.blog-posts__card-title a:hover {
+  text-decoration: underline;
 }
 </style>
