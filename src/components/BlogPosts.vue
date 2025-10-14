@@ -1,6 +1,9 @@
 <template>
   <div class="blog-posts">
-    <h2 class="blog-posts__title">Блог</h2>
+    <h2 class="blog-posts__title">Блоги</h2>
+
+    <p v-if="loading" class="blog-posts__loading">Завантаження...</p>
+    <p v-if="error" class="blog-posts__error">{{ error }}</p>
 
     <!-- Пошук постів -->
     <div class="blog-posts__search">
@@ -22,13 +25,13 @@
         <h3 class="blog-posts__card-title">
           <router-link :to="`/post/${post.id}`">{{ post.title }}</router-link>
         </h3>
-        <p class="blog-posts__card-content">{{ post.content }}</p>
+        <p class="blog-posts__card-content">{{ post.body }}</p>
 
         <!-- Кнопки управління постом -->
         <div class="blog-posts__button-group">
           <button
             class="blog-posts__button blog-posts__button--delete"
-            @click="postsStore.removePost(post.id)"
+            @click="removePost(post.id)"
           >
             Видалити
           </button>
@@ -81,11 +84,11 @@
     </div>
 
     <!-- Статистика та видалення всіх постів -->
-    <p>Загальна кількість постів: {{ postsStore.getPostsCount }}</p>
+    <p>Загальна кількість постів: {{ posts.length }}</p>
     <button
-      v-if="postsStore.getPostsCount !== 0"
+      v-if="posts.length !== 0"
       class="blog-posts__button blog-posts__button--delete"
-      @click="postsStore.removeAllPosts()"
+      @click="removeAllPosts()"
     >
       Видалити всі пости
     </button>
@@ -116,11 +119,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { usePostsStore } from "@/stores/store";
+import { ref, computed, onMounted } from "vue";
 
-// Ініціалізація стора для роботи з постами
-const postsStore = usePostsStore();
+// Масив постів
+const posts = ref([]);
+
+// Реактивні змінні для API call повідомлень
+const loading = ref(true);
+const error = ref(null);
 
 // Реактивні змінні для нового поста
 const newPostTitle = ref("");
@@ -134,13 +140,45 @@ const editContent = ref("");
 // Змінна для пошуку
 const searchQuery = ref("");
 
+// Отримання постів
+const fetchPost = async () => {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    if (!response.ok) throw new Error("Не вдалося отримати пости");
+    const allPosts = await response.json();
+    // Імітація затримки, як при довгому запиті до API
+    setTimeout(() => {
+      posts.value = allPosts.slice(0, 4); // Відображаємо тільки перші 4 пости
+      loading.value = false;
+    }, 3000);
+  } catch (err) {
+    loading.value = false;
+    error.value = err.message;
+  }
+};
+
+onMounted(fetchPost);
+
+// Обчислювана властивість для фільтрації постів
+const filteredPosts = computed(() => {
+  return posts.value.filter((post) =>
+    post.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// Видалення всіх постів
+const removeAllPosts = () => {
+  posts.value = [];
+};
+
 // Додавання нового поста
 const addNewPost = () => {
   // Перевірка, що обидва поля заповнені
   if (newPostTitle.value && newPostContent.value) {
-    postsStore.addPost({
+    posts.value.unshift({
+      id: Date.now(),
       title: newPostTitle.value,
-      content: newPostContent.value,
+      body: newPostContent.value,
     });
     // Очищення полів після додавання
     newPostTitle.value = "";
@@ -148,20 +186,26 @@ const addNewPost = () => {
   }
 };
 
+// Видалення поста
+const removePost = (postId) => {
+  posts.value = posts.value.filter((post) => post.id !== postId);
+};
+
 // Початок редагування поста
 function startEdit(post) {
   editingPostId.value = post.id;
   editTitle.value = post.title;
-  editContent.value = post.content;
+  editContent.value = post.body;
 }
 
 // Збереження змін при редагуванні
 function submitEdit(postId) {
   if (editTitle.value && editContent.value) {
-    postsStore.editPost(postId, {
-      title: editTitle.value,
-      content: editContent.value,
-    });
+    const post = posts.value.find((p) => p.id === postId);
+    if (post) {
+      post.title = editTitle.value;
+      post.body = editContent.value;
+    }
     cancelEdit(); // Закрити форму після збереження
   }
 }
@@ -172,13 +216,6 @@ function cancelEdit() {
   editTitle.value = "";
   editContent.value = "";
 }
-
-// Обчислювана властивість для фільтрації постів
-const filteredPosts = computed(() => {
-  return postsStore.posts.filter((post) =>
-    post.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
 </script>
 
 <style>
