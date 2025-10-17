@@ -3,7 +3,9 @@
     <h2 class="blog-posts__title">Блоги</h2>
 
     <p v-if="loading" class="blog-posts__loading">Завантаження...</p>
-    <p v-if="error" class="blog-posts__error">{{ error }}</p>
+    <Transition name="slide-fade">
+      <p v-if="error" class="blog-posts__error">{{ error }}</p>
+    </Transition>
 
     <!-- Пошук постів -->
     <div class="blog-posts__search">
@@ -15,83 +17,88 @@
     </div>
 
     <!-- Список постів -->
-    <div class="blog-posts__list">
-      <!-- Цикл по відфільтрованих постах -->
-      <div
-        v-for="post in filteredPosts"
-        :key="post.id"
-        class="blog-posts__card"
-      >
-        <h3 class="blog-posts__card-title">
-          <router-link :to="`/post/${post.id}`">{{ post.title }}</router-link>
-        </h3>
-        <p class="blog-posts__card-content">{{ post.body }}</p>
-
-        <!-- Кнопки управління постом -->
-        <div class="blog-posts__button-group">
-          <button
-            class="blog-posts__button blog-posts__button--delete"
-            @click="removePost(post.id)"
-          >
-            Видалити
-          </button>
-          <button
-            class="blog-posts__button blog-posts__button--edit"
-            @click="startEdit(post)"
-          >
-            Редагувати
-          </button>
-        </div>
-
-        <!-- Форма редагування (показується тільки для активного поста) -->
+    <div>
+      <TransitionGroup name="list" class="blog-posts__list">
+        <!-- Цикл по відфільтрованих постах -->
         <div
-          v-if="editingPostId === post.id"
-          class="blog-posts__edit-form-wrapper"
+          v-for="post in filteredPosts"
+          :key="post.id"
+          class="blog-posts__card"
         >
-          <form @submit.prevent="submitEdit(post.id)">
-            <div>
-              <label>Заголовок:</label>
-              <input
-                v-model="editTitle"
-                type="text"
-                placeholder="Введіть заголовок"
-              />
+          <h3 class="blog-posts__card-title">
+            <router-link :to="`/post/${post.id}`">{{ post.title }}</router-link>
+          </h3>
+          <p class="blog-posts__card-content">{{ post.body }}</p>
+
+          <!-- Кнопки управління постом -->
+          <div class="blog-posts__button-group">
+            <button
+              class="blog-posts__button blog-posts__button--delete"
+              @click="removePost(post.id)"
+            >
+              Видалити
+            </button>
+            <button
+              class="blog-posts__button blog-posts__button--edit"
+              @click="startEdit(post)"
+            >
+              Редагувати
+            </button>
+          </div>
+          <Transition name="fade">
+            <!-- Форма редагування (показується тільки для активного поста) -->
+            <div
+              v-if="editingPostId === post.id"
+              class="blog-posts__edit-form-wrapper"
+            >
+              <form @submit.prevent="submitEdit(post.id)">
+                <div>
+                  <label>Заголовок:</label>
+                  <input
+                    v-model="editTitle"
+                    type="text"
+                    placeholder="Введіть заголовок"
+                  />
+                </div>
+                <div>
+                  <label>Контент:</label>
+                  <textarea
+                    v-model="editContent"
+                    placeholder="Введіть контент"
+                  ></textarea>
+                </div>
+                <div class="blog-posts__button-group">
+                  <button
+                    type="submit"
+                    class="blog-posts__button blog-posts__button--save"
+                  >
+                    Зберегти
+                  </button>
+                  <button
+                    class="blog-posts__button blog-posts__button--cancel"
+                    @click="cancelEdit"
+                  >
+                    Скасувати
+                  </button>
+                </div>
+              </form>
             </div>
-            <div>
-              <label>Контент:</label>
-              <textarea
-                v-model="editContent"
-                placeholder="Введіть контент"
-              ></textarea>
-            </div>
-            <div class="blog-posts__button-group">
-              <button
-                type="submit"
-                class="blog-posts__button blog-posts__button--save"
-              >
-                Зберегти
-              </button>
-              <button
-                class="blog-posts__button blog-posts__button--cancel"
-                @click="cancelEdit"
-              >
-                Скасувати
-              </button>
-            </div>
-          </form>
+          </Transition>
         </div>
-      </div>
+      </TransitionGroup>
     </div>
 
     <!-- Статистика та видалення всіх постів -->
     <p>Загальна кількість постів: {{ posts.length }}</p>
-    <button
-      v-if="posts.length !== 0"
-      class="blog-posts__button blog-posts__button--delete"
-      @click="removeAllPosts()"
-    >
-      Видалити всі пости
-    </button>
+    <Transition name="fade-scale">
+      <button
+        v-if="posts.length !== 0"
+        class="blog-posts__button blog-posts__button--delete"
+        @click="removeAllPosts()"
+      >
+        Видалити всі пости
+      </button>
+    </Transition>
 
     <!-- Форма додавання нового поста -->
     <h3>Додати новий пост</h3>
@@ -120,6 +127,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import "@/assets/styles/animations.css";
 
 // Масив постів
 const posts = ref([]);
@@ -150,7 +158,7 @@ const fetchPost = async () => {
     setTimeout(() => {
       posts.value = allPosts.slice(0, 4); // Відображаємо тільки перші 4 пости
       loading.value = false;
-    }, 3000);
+    }, 1000);
   } catch (err) {
     loading.value = false;
     error.value = err.message;
