@@ -8,13 +8,15 @@
     </Transition>
 
     <!-- Пошук постів -->
-    <div class="blog-posts__search">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Введіть заголовок для пошуку"
-      />
-    </div>
+    <Transition name="fade-scale">
+      <div v-if="posts.length !== 0" class="blog-posts__search">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Введіть заголовок для пошуку"
+        />
+      </div>
+    </Transition>
 
     <!-- Список постів -->
     <div>
@@ -126,104 +128,33 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
 import "@/assets/styles/animations.css";
+import { usePosts } from "@/composables/usePosts";
+import { usePostForm } from "@/composables/usePostForm";
 
-// Масив постів
-const posts = ref([]);
+// Викликаємо usePosts() - отримуємо все для постів
+const {
+  posts,
+  loading,
+  error,
+  searchQuery,
+  filteredPosts,
+  removeAllPosts,
+  removePost,
+} = usePosts();
 
-// Реактивні змінні для API call повідомлень
-const loading = ref(true);
-const error = ref(null);
-
-// Реактивні змінні для нового поста
-const newPostTitle = ref("");
-const newPostContent = ref("");
-
-// Реактивні змінні для редагування
-const editingPostId = ref(null); // ID поста, який редагується
-const editTitle = ref("");
-const editContent = ref("");
-
-// Змінна для пошуку
-const searchQuery = ref("");
-
-// Отримання постів
-const fetchPost = async () => {
-  try {
-    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
-    if (!response.ok) throw new Error("Не вдалося отримати пости");
-    const allPosts = await response.json();
-    // Імітація затримки, як при довгому запиті до API
-    setTimeout(() => {
-      posts.value = allPosts.slice(0, 4); // Відображаємо тільки перші 4 пости
-      loading.value = false;
-    }, 1000);
-  } catch (err) {
-    loading.value = false;
-    error.value = err.message;
-  }
-};
-
-onMounted(fetchPost);
-
-// Обчислювана властивість для фільтрації постів
-const filteredPosts = computed(() => {
-  return posts.value.filter((post) =>
-    post.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-// Видалення всіх постів
-const removeAllPosts = () => {
-  posts.value = [];
-};
-
-// Додавання нового поста
-const addNewPost = () => {
-  // Перевірка, що обидва поля заповнені
-  if (newPostTitle.value && newPostContent.value) {
-    posts.value.unshift({
-      id: Date.now(),
-      title: newPostTitle.value,
-      body: newPostContent.value,
-    });
-    // Очищення полів після додавання
-    newPostTitle.value = "";
-    newPostContent.value = "";
-  }
-};
-
-// Видалення поста
-const removePost = (postId) => {
-  posts.value = posts.value.filter((post) => post.id !== postId);
-};
-
-// Початок редагування поста
-function startEdit(post) {
-  editingPostId.value = post.id;
-  editTitle.value = post.title;
-  editContent.value = post.body;
-}
-
-// Збереження змін при редагуванні
-function submitEdit(postId) {
-  if (editTitle.value && editContent.value) {
-    const post = posts.value.find((p) => p.id === postId);
-    if (post) {
-      post.title = editTitle.value;
-      post.body = editContent.value;
-    }
-    cancelEdit(); // Закрити форму після збереження
-  }
-}
-
-// Скасування редагування
-function cancelEdit() {
-  editingPostId.value = null;
-  editTitle.value = "";
-  editContent.value = "";
-}
+// Викликаємо usePostForm(posts) - передаємо posts для мутації
+const {
+  newPostTitle,
+  newPostContent,
+  editingPostId,
+  editTitle,
+  editContent,
+  addNewPost,
+  startEdit,
+  submitEdit,
+  cancelEdit,
+} = usePostForm(posts);
 </script>
 
 <style>
