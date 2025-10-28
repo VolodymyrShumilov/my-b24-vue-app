@@ -58,7 +58,7 @@ describe("UserCard", () => {
   });
 
   // Тест 6: Клік на кнопку "Зв'язатися" - випускає подію contact
-  test("Випускає подію contact при кліку на кнопку Звязатися", async () => {
+  test("Випускає подію contact при кліку на кнопку 'Зв'язатися'", async () => {
     const wrapper = mount(UserCard, {
       props: {
         name: "Іван",
@@ -75,4 +75,18 @@ describe("UserCard", () => {
   });
 
   // Тест 7: Клік на кнопку "Показати улюблений колір" - випускає подію color
+  test("Випускає подію color при кліку на кнопку 'Показати улюблений колір'", async () => {
+    const wrapper = mount(UserCard, {
+      props: {
+        favoriteColor: "червоний",
+      },
+    });
+
+    await wrapper.findAll("button")[1].trigger("click");
+
+    // Перевіряємо чи подія випущена з правильними даними
+    const emitted = wrapper.emitted("color");
+    expect(emitted).toBeTruthy();
+    expect(emitted[0]).toEqual(["червоний"]);
+  });
 });
