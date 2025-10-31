@@ -12,6 +12,7 @@
         placeholder="Введіть ваше ім'я"
         v-autofocus
         v-uppercase
+        v-highlight
       />
     </div>
     <!-- Поле для email -->
@@ -33,6 +34,7 @@
         maxlength="13"
         class="contact-form__input"
         placeholder="Введіть ваш телефон в форматі +380xxxxxxxxx"
+        v-ukrphone
       />
     </div>
 
