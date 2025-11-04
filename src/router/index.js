@@ -3,6 +3,8 @@ import HomeView from "../views/HomeView.vue";
 import BlogsView from "@/views/BlogsView.vue";
 import PostDetail from "@/components/PostDetail.vue";
 import ContactsView from "@/views/ContactsView.vue";
+import LoginView from "@/views/LoginView.vue";
+import { useAuthStore } from "@/stores/auth";
 
 const routes = [
   {
@@ -22,11 +24,25 @@ const routes = [
   { path: "/blogs", name: "blogs", component: BlogsView },
   { path: "/post/:id", component: PostDetail },
   { path: "/contacts", name: "contacts", component: ContactsView },
+  { path: "/login", name: "login", component: LoginView },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore();
+
+  if (to.path === "/blogs" && !auth.isLoggedIn) {
+    next({
+      path: "/login",
+      query: { redirect: to.fullPath },
+    });
+  } else {
+    next();
+  }
 });
 
 export default router;

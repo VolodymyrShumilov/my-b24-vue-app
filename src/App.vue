@@ -9,6 +9,9 @@
       <router-link to="/about">About</router-link> |
       <router-link to="/blogs">Blogs</router-link> |
       <router-link to="/contacts">Contacts</router-link>
+      <button v-if="auth.isLoggedIn" @click="auth.logout" class="logout-btn">
+        Вийти
+      </button>
     </nav>
     <router-view />
   </div>
@@ -17,8 +20,10 @@
 <script setup>
 import { ref, provide, computed } from "vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
+import { useAuthStore } from "./stores/auth";
 
 const isDark = ref(false);
+const auth = useAuthStore();
 
 // Обробка зміни теми
 const handleThemeChange = (newThemeValue) => {
@@ -42,6 +47,20 @@ provide("theme", theme);
 
 #main {
   min-height: 100vh;
+}
+
+.logout-btn {
+  background-color: #42b983;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #3aa876;
 }
 
 /* Контейнер для кнопки теми */
