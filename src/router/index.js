@@ -5,6 +5,7 @@ import PostDetail from "@/components/PostDetail.vue";
 import ContactsView from "@/views/ContactsView.vue";
 import LoginView from "@/views/LoginView.vue";
 import { useAuthStore } from "@/stores/auth";
+import TodoView from "@/views/TodoView.vue";
 
 const routes = [
   {
@@ -21,28 +22,32 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
-  { path: "/blogs", name: "blogs", component: BlogsView },
+  {
+    path: "/blogs",
+    name: "blogs",
+    component: BlogsView,
+    beforeEnter: (to, from, next) => {
+      const auth = useAuthStore();
+
+      if (!auth.isLoggedIn) {
+        next({
+          path: "/login",
+          query: { redirect: to.fullPath },
+        });
+      } else {
+        next();
+      }
+    },
+  },
   { path: "/post/:id", component: PostDetail },
   { path: "/contacts", name: "contacts", component: ContactsView },
   { path: "/login", name: "login", component: LoginView },
+  { path: "/todos", name: "todos", component: TodoView },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
-});
-
-router.beforeEach((to, from, next) => {
-  const auth = useAuthStore();
-
-  if (to.path === "/blogs" && !auth.isLoggedIn) {
-    next({
-      path: "/login",
-      query: { redirect: to.fullPath },
-    });
-  } else {
-    next();
-  }
 });
 
 export default router;

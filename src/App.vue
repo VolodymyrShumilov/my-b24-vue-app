@@ -8,7 +8,8 @@
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link> |
       <router-link to="/blogs">Blogs</router-link> |
-      <router-link to="/contacts">Contacts</router-link>
+      <router-link to="/contacts">Contacts</router-link> |
+      <router-link to="/todos">Todos</router-link>
       <button v-if="auth.isLoggedIn" @click="auth.logout" class="logout-btn">
         Вийти
       </button>
