@@ -8,6 +8,10 @@
       <slot></slot>
     </div>
 
+    <div>
+      <slot name="userImage"></slot>
+    </div>
+
     <footer class="card-footer">
       <slot name="footer"></slot>
     </footer>

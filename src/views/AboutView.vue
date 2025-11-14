@@ -20,6 +20,15 @@
       <template #footer>
         <button class="slot-card-btn">Написати</button>
       </template>
+
+      <!-- Іменований слот: userImage -->
+      <template #userImage>
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/3233/3233508.png"
+          alt="Фото профілю"
+          class="user-photo"
+        />
+      </template>
     </SlotCard>
 
     <!-- Використовуємо scoped slot -->

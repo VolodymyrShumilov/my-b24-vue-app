@@ -79,13 +79,22 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 
 // Реактивні данні
 const newTodo = ref("");
 const todos = ref([]);
 const filter = ref("all");
 let nextId = 0;
+
+// Автоматичне збереження при зміні todos
+watch(
+  todos,
+  () => {
+    updateLocalStorage();
+  },
+  { deep: true }
+);
 
 // Методи
 // Додавання завдання
@@ -110,6 +119,17 @@ const removeTodo = (id) => {
 const clearCompleted = () => {
   // Залишаємо тільки невиконані завдання
   todos.value = todos.value.filter((todo) => !todo.completed);
+};
+
+// Завантаження данних з localStorage
+const loadDataFromLocalStorage = () => {
+  const stored = localStorage.getItem("todoList");
+  todos.value = stored ? JSON.parse(stored) : [];
+};
+
+// Оновлення масиву в localStorage
+const updateLocalStorage = () => {
+  localStorage.setItem("todoList", JSON.stringify(todos.value));
 };
 
 // Обчислювальні властивості
@@ -137,6 +157,8 @@ const filteredTodos = computed(() => {
       return todos.value; // Всі завдання
   }
 });
+
+onMounted(loadDataFromLocalStorage);
 </script>
 
 <style scoped>

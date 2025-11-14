@@ -6,6 +6,8 @@ import ContactsView from "@/views/ContactsView.vue";
 import LoginView from "@/views/LoginView.vue";
 import { useAuthStore } from "@/stores/auth";
 import TodoView from "@/views/TodoView.vue";
+import ButtonView from "@/views/ButtonView.vue";
+import TemplateRefsView from "@/views/TemplateRefsView.vue";
 
 const routes = [
   {
@@ -43,6 +45,8 @@ const routes = [
   { path: "/contacts", name: "contacts", component: ContactsView },
   { path: "/login", name: "login", component: LoginView },
   { path: "/todos", name: "todos", component: TodoView },
+  { path: "/button", name: "button", component: ButtonView },
+  { path: "/template-refs", name: "templateRefs", component: TemplateRefsView },
 ];
 
 const router = createRouter({
