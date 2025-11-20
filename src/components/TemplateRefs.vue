@@ -19,15 +19,33 @@
       <button @click="readContent" class="demo-btn">Прочитати контент</button>
       <p v-if="content">Контент: "{{ content }}"</p>
     </div>
-  </div>
 
-  <!-- Приклад 3 -->
-  <div class="example-section">
-    <h3>2. Зміна стилю елемента</h3>
-    <div ref="myBox" class="style-box">
-      Натисні на кнопку, щоб змінити мене!
+    <!-- Приклад 3 -->
+    <div class="example-section">
+      <h3>3. Зміна стилю елемента</h3>
+      <div ref="myBox" class="style-box">
+        Натисні на кнопку, щоб змінити мене!
+      </div>
+      <button @click="changeStyle" class="demo-btn">Змінити колір</button>
     </div>
-    <button @click="changeStyle" class="demo-btn">Змінити колір</button>
+
+    <!-- Приклад 4 -->
+    <div class="example-section">
+      <h3>4. Лічильник символів в Textarea</h3>
+      <textarea
+        ref="textareaRef"
+        v-model="textContent"
+        placeholder="Надрукуйте щось..."
+        class="demo-textarea"
+        @input="updateCharCount"
+      ></textarea>
+      <p class="char-count">
+        Символів: {{ charCount }} | Виділення: {{ selectionInfo }}
+      </p>
+      <button @click="getSelection" class="demo-btn">
+        Отримати виділений текст
+      </button>
+    </div>
   </div>
 </template>
 
@@ -60,6 +78,30 @@ const changeStyle = () => {
     const colors = ["red", "blue", "yellow", "green"];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     myBox.value.style.backgroundColor = randomColor;
+  }
+};
+
+// Приклад 4
+const textareaRef = ref(null);
+const textContent = ref("");
+const charCount = ref(0);
+const selectionInfo = ref("Нічого");
+
+const updateCharCount = () => {
+  charCount.value = textContent.value.length;
+};
+
+const getSelection = () => {
+  if (textareaRef.value) {
+    const start = textareaRef.value.selectionStart;
+    const end = textareaRef.value.selectionEnd;
+    const selectedText = textContent.value.substring(start, end);
+
+    if (selectedText) {
+      selectionInfo.value = `"${selectedText}" (${selectedText.length} chars)`;
+    } else {
+      selectionInfo.value = "Нічого";
+    }
   }
 };
 </script>

@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/auth";
 import TodoView from "@/views/TodoView.vue";
 import ButtonView from "@/views/ButtonView.vue";
 import TemplateRefsView from "@/views/TemplateRefsView.vue";
+import TeleportView from "@/views/TeleportView.vue";
 
 const routes = [
   {
@@ -47,6 +48,7 @@ const routes = [
   { path: "/todos", name: "todos", component: TodoView },
   { path: "/button", name: "button", component: ButtonView },
   { path: "/template-refs", name: "templateRefs", component: TemplateRefsView },
+  { path: "/teleport", name: "teleport", component: TeleportView },
 ];
 
 const router = createRouter({
